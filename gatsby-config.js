@@ -35,7 +35,7 @@ module.exports = {
           },
           {
             name: `Homepage`,
-            url: `https://bass.sh`,
+            url: `http://localhost:8000`,
           },
         ],
       },

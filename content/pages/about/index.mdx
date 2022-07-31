@@ -1,18 +1,62 @@
 ---
-title: About
+title: About 
 slug: "/about"
+embeddedImagesRemote:
+  - https://live.staticflickr.com/65535/52252503448_eaf6bd8d1a_o.png
+  - https://live.staticflickr.com/65535/52252667723_1393530024_o.jpg
 ---
-import { Box, Grid, Image, Paragraph} from "theme-ui"
+import { Grid, Box } from "theme-ui"
+import { getImage} from "gatsby-plugin-image"
+import { Link } from "gatsby"
 
-<Grid gap={4} columns={[2, '1fr 2fr']}>
-  <Image src="pfp.jpeg"/>
-  <p> If you're experienced with GraphQL, you can also export GraphQL fragments
-  from components and compose the fragments in the Page component query and
-  pass data down into the child component</p>
+<Grid gap={4} columns={[2, '.75fr 2fr']}>
+  <GatsbyImage sx={{ borderRadius: '5%'}} image={getImage(props.remoteImages[0])} />
+  <p>
+    <b>Hey, I'm Matthew!</b>
+    <br/><br/>
+    I'm a security engineer from Austin, Texas. I currently work at <Link to="https://www.atlassian.com/">Atlassian</Link>
+    on their vulnerability management team.
+    <br/><br/>
+    I'm passionate about tax evasion, never voting, and exploiting white privilege.
+    <br/><br/>
+    ... and the grindset.
+  </p>
 </Grid>
 
+#### Work
+At Atlassian I currently manage all things related to our bug bounty program, and have
+been involved in some pretty interesting vulns [[1]](https://portswigger.net/research/http2) [[2]](https://www.bugcrowd.com/blog/big-bugs-cve-2020-28914/)
 
-#### What I'm passionate about
-Doing some stuff 
+For development work, I helped integrate [Snyk](https://snyk.io/case-studies/atlassian/) to scan
+over 40,000 repositories for vulnerable dependencies and automatically file tickets and build out a custom
+token scanning solution for erroneously committed application secrets.
 
-#### Hobbies
+#### Other Stuff
+<Grid gap={1} columns={[2, '1.5fr 2fr']}>
+  <Box>
+    <p>I have a cute dog. Her name is <b>Isla</b>.</p>
+    <p>She's a 40lb lab who loves to eat and fetch. But, I guess that's not very iconic of her.</p>
+    <p>I also have a bunch of random hobbies - with most rotating as I get bored - but a few have stuck around for quite a while.</p>
+  </Box>
+  <GatsbyImage sx={{ marginX: "100px", maxHeight: '300px', borderRadius: '5%'}} image={getImage(props.remoteImages[1])} />
+</Grid>
+
+##### Photography
+Nowadays, I mostly shoot film. You can view all my photo blogs [here](/tags/photo), and most photos should have captions about what they were taken with.
+
+Current Gear List:
+- **Black Leica M6:** I love this camera, and shoot predominately with it. The viewfinder is upgraded to the MP version from [yyecamera](http://www.yyecamera.com/), but if I'm being honest with myself it's hard to tell a difference.
+- **Nikon FM2n**: Bought this on ebay and it arrived with the top viewfinder dented. I tell myself it's a personality trait.
+- **Polaroid SX70**: This one is on the way - its a foldable polaroid from the 70's that feels like you're going to break it every time you use it. Pretty exciting.
+- **Mamiya 645 Pro TL**: Truthfully, I haven't shot this all that much. It's kind of a brick, but it's really fun.
+- **Sony A7iii**: This is mostly just a fancy webcam + film scanner.
+
+##### Keyboards
+
+I got into this ridiculous hobby back in 2017, back when people blindly bought some rubber rings on ebay from a un-reviewed seller for $40 without question.
+
+Now, there are even [retail stores](https://www.instagram.com/tinykeyboardshop/) for building these things. It's awesome.
+
+In pursuit of typing heaven I've cycled through around 20 boards, and have slowed down significantly in the last couple years.
+
+Now, I mostly use the hobby as a way to keep up with friends.
