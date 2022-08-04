@@ -44,11 +44,11 @@ const Homepage = ({ posts }: PostsProps) => {
       <Title text="Latest Tech Posts">
         <Link to={replaceSlashes(`/${basePath}/${blogPath}`)}>Read all posts</Link>
       </Title>
-      <FilteredListing posts={posts} showTags={true} tagFilter="novel" limit={3}/>
-      <Title text="Other Posts">
+      <FilteredListing posts={posts} showTags={true} tagFilter="tech" limit={3}/>
+      <Title text="Journal">
         <Link to={replaceSlashes(`/${basePath}/${blogPath}`)}>Read all posts</Link>
       </Title>
-      <FilteredListing posts={posts} showTags={true} tagFilter="dark-arts" limit={3}/>
+      <FilteredListing posts={posts} showTags={true} tagFilter="journal" limit={3}/>
       <List>
         <Bottom />
       </List>
