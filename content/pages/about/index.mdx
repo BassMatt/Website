@@ -5,22 +5,17 @@ embeddedImagesRemote:
   - https://live.staticflickr.com/65535/52252503448_eaf6bd8d1a_o.png
   - https://live.staticflickr.com/65535/52252667723_1393530024_o.jpg
 ---
-import { Grid, Box } from "theme-ui"
+import { Grid, Flex } from "theme-ui"
 import { getImage} from "gatsby-plugin-image"
 import { Link } from "gatsby"
 
-<Grid gap={4} columns={[2, '.75fr 2fr']}>
-  <GatsbyImage sx={{ borderRadius: '5%'}} image={getImage(props.remoteImages[0])} />
-  <p>
-    <b>Hey, I'm Matthew!</b>
-    <br/><br/>
-    I'm a security engineer from Austin, Texas. I currently work at <Link to="https://www.atlassian.com/">Atlassian</Link>
-    on their vulnerability management team.
-    <br/><br/>
-    I'm passionate about developing self-service appsec tooling and scaling security teams to accommodate the kodak 20% price increase.
-    <br/><br/>
-    ... but work can be fun too.
-  </p>
+<Grid sx={{gridTemplateColumns: ['1fr', '1fr 2fr'], alignItems: "center", justifyItems: "center", gap: "3%", marginY: "3%"}}>
+  <GatsbyImage sx={{ borderRadius: '5%', minWidth: ["0em", "0e"], maxWidth: ["20em", "30em"] }} image={getImage(props.remoteImages[0])} />
+  <Box sx={{minWidth: "0%"}}>
+    <p><strong>Hey, I'm Matthew!</strong></p>
+    <p>I'm a security engineer from Austin, Texas. I currently work at <Link to="https://www.atlassian.com/">Atlassian</Link> on their vulnerability management team.</p>
+    <p>I'm passionate about developing self-service appsec tooling and scaling security teams to accommodate the kodak 20% price increase.</p>
+  </Box>
 </Grid>
 
 #### Work
@@ -32,17 +27,17 @@ I also integrated [Snyk](https://snyk.io/case-studies/atlassian/) to scan over
 scanner erroneously committed application secrets, and worked with developers on
 timelines to resolve all the aforementioned tickets.
 
-#### Other Stuff
-<Grid gap={1} columns={[2, '1.5fr 2fr']}>
-  <Box>
-    <p>I have a cute dog. Her name is <b>Isla</b>.</p>
+#### Dog
+<Grid sx={{gridTemplateColumns: ['1fr', '1fr 2fr'], alignItems: "top", justifyItems: "center", gap: "1%", marginY: "1%"}}>
+  <div>
+    <p>I have a cute dog. Her name is <strong>Isla</strong>.</p>
     <p>She's a 40lb lab who loves to eat and fetch, arguably too much.</p>
     <p>I also have a bunch of random hobbies - with most rotating as I get bored - but a few have stuck around for quite a while.</p>
-  </Box>
-  <GatsbyImage sx={{ marginX: "100px", maxHeight: '300px', borderRadius: '5%'}} image={getImage(props.remoteImages[1])} />
+  </div>
+  <GatsbyImage sx={{ maxHeight: '25em', maxWidth: "30em", borderRadius: '5%'}} image={getImage(props.remoteImages[1])} />
 </Grid>
 
-##### Photography
+#### Photography
 I enjoy shooting film. You can view all my photo blogs [here](/tags/photo), and most photos have captions about what they were taken with.
 
 Current Gear List:
@@ -51,12 +46,3 @@ Current Gear List:
 - **Polaroid SX70**: This one is on the way - its a foldable polaroid from the 70's that feels like you're going to break it every time you use it. Pretty exciting.
 - **Mamiya 645 Pro TL**: Truthfully, I haven't shot this all that much. It's kind of a brick, but it's really fun.
 - **Sony A7iii**: This is mostly just a fancy webcam + film scanner.
-
-##### Keyboards
-
-I got into this ridiculous hobby back in 2017, "back in the old day" when people
-blindly bought some rubber rings on ebay from a un-reviewed seller for $40
-without question just for the _chance_ of a quieter thock.
-
-Now, there are even [retail stores](https://www.instagram.com/tinykeyboardshop/)
-for building these things. It's awesome.

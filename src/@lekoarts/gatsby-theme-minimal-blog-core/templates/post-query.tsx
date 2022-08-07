@@ -32,7 +32,7 @@ export const query = graphql`
             id
             embeddedImagesRemote {
               childImageSharp {
-                gatsbyImageData(layout: FULL_WIDTH)
+                gatsbyImageData(layout: CONSTRAINED)
               }
             }
           }
