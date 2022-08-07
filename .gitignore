@@ -59,6 +59,7 @@ typings/
 .env
 .env.*
 !.env.example
+*/.env
 
 .cache
 **/.cache
@@ -67,5 +68,3 @@ public
 .idea
 .vscode
 .DS_Store
-
-typeDefs.txt
